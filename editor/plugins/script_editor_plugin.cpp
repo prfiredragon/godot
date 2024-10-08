@@ -5,6 +5,8 @@
 /*                             GODOT ENGINE                               */
 /*                        https://godotengine.org                         */
 /**************************************************************************/
+/* Copyright (c) 2024-present Redot Engine contributors                   */
+/*                                          (see REDOT_AUTHORS.md)        */
 /* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
 /* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
 /*                                                                        */
@@ -2115,12 +2117,12 @@ void ScriptEditor::_update_online_doc() {
 	}
 	if (native_class_doc) {
 		String name = eh->get_class();
-		String tooltip = vformat(TTR("Open '%s' in Godot online documentation."), name);
+		String tooltip = vformat(TTR("Open '%s' in Redot online documentation."), name);
 		site_search->set_text(TTR("Open in Online Docs"));
 		site_search->set_tooltip_text(tooltip);
 	} else {
 		site_search->set_text(TTR("Online Docs"));
-		site_search->set_tooltip_text(TTR("Open Godot online documentation."));
+		site_search->set_tooltip_text(TTR("Open Redot online documentation."));
 	}
 }
 
@@ -2798,6 +2800,8 @@ void ScriptEditor::_reload_scripts(bool p_refresh_only) {
 				scr->set_source_code(rel_scr->get_source_code());
 				scr->set_last_modified_time(rel_scr->get_last_modified_time());
 				scr->reload(true);
+
+				update_docs_from_script(scr);
 			}
 
 			Ref<JSON> json = edited_res;
@@ -3644,11 +3648,9 @@ void ScriptEditor::update_doc(const String &p_name) {
 void ScriptEditor::clear_docs_from_script(const Ref<Script> &p_script) {
 	ERR_FAIL_COND(p_script.is_null());
 
-	Vector<DocData::ClassDoc> documentations = p_script->get_documentation();
-	for (int j = 0; j < documentations.size(); j++) {
-		const DocData::ClassDoc &doc = documentations.get(j);
-		if (EditorHelp::get_doc_data()->has_doc(doc.name)) {
-			EditorHelp::get_doc_data()->remove_doc(doc.name);
+	for (const DocData::ClassDoc &cd : p_script->get_documentation()) {
+		if (EditorHelp::get_doc_data()->has_doc(cd.name)) {
+			EditorHelp::get_doc_data()->remove_doc(cd.name);
 		}
 	}
 }
@@ -3656,11 +3658,9 @@ void ScriptEditor::clear_docs_from_script(const Ref<Script> &p_script) {
 void ScriptEditor::update_docs_from_script(const Ref<Script> &p_script) {
 	ERR_FAIL_COND(p_script.is_null());
 
-	Vector<DocData::ClassDoc> documentations = p_script->get_documentation();
-	for (int j = 0; j < documentations.size(); j++) {
-		const DocData::ClassDoc &doc = documentations.get(j);
-		EditorHelp::get_doc_data()->add_doc(doc);
-		update_doc(doc.name);
+	for (const DocData::ClassDoc &cd : p_script->get_documentation()) {
+		EditorHelp::get_doc_data()->add_doc(cd);
+		update_doc(cd.name);
 	}
 }
 
@@ -4615,7 +4615,7 @@ ScriptEditorPlugin::ScriptEditorPlugin() {
 	ED_SHORTCUT("script_text_editor/capitalize", TTR("Capitalize"), KeyModifierMask::SHIFT | Key::F6);
 
 	window_wrapper = memnew(WindowWrapper);
-	window_wrapper->set_window_title(vformat(TTR("%s - Godot Engine"), TTR("Script Editor")));
+	window_wrapper->set_window_title(vformat(TTR("%s - Redot Engine"), TTR("Script Editor")));
 	window_wrapper->set_margins_enabled(true);
 
 	script_editor = memnew(ScriptEditor(window_wrapper));
